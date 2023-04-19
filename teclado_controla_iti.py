@@ -44,35 +44,34 @@ while True:
             exit()
 
     #comandos de teclas
-    if event.type == KEYDOWN:
+    key = pygame.key.get_focused()
+    if key[pygame.K_RIGHT]:
+        xc = xc+7
+        if xc > x:
+        xc = 0
+        img_direction = pygame.math.Vector2(0, -1)
 
-        if event.key == pygame.K_RIGHT:
-            xc = xc+7
-            if xc > x:
-                xc = 0
-            img_direction = pygame.math.Vector2(0, -1)
-
-        if event.key == pygame.K_LEFT:
-            xc = xc-7
-            if xc < 0:
-                xc = x
-            img_direction = pygame.math.Vector2(0, 1)
+    if key[pygame.K_LEFT]:
+        xc = xc-7
+        if xc < 0:
+            xc = x
+        img_direction = pygame.math.Vector2(0, 1)
             
-        if event.key == pygame.K_UP:
-            yc = yc-7
-            if yc < 0:
-                yc = y
-            img_direction = pygame.math.Vector2(-1, 0)
+    if key[pygame.K_UP]:
+        yc = yc-7
+        if yc < 0:
+        yc = y
+        img_direction = pygame.math.Vector2(-1, 0)
 
-        if event.key == pygame.K_DOWN:
-            yc = yc+7
-            if yc > y:
-                yc = 0
-            img_direction = pygame.math.Vector2(1, 0)
+    if key[pygame.K_DOWN]:
+        yc = yc+7
+        if yc > y:
+        yc = 0
+        img_direction = pygame.math.Vector2(1, 0)
         
-        if event.key == pygame.K_ESCAPE:
-            pygame.quit()
-            exit()
+    if event.key == pygame.K_ESCAPE:
+        pygame.quit()
+        exit()
 
     # atualize a posição do objeto com base na direção e na velocidade
     img_pos[0] += img_direction.x * img_speed[0]
