@@ -20,6 +20,7 @@ grey = (128, 128, 128)
 #objeto
 fonts = pygame.font.SysFont(pygame.font.get_default_font(), 32)
 obj = fonts.render("I-T-I", True, white)
+rect = obj.get_rect()
 
 #localização e movimentação do objeto
 x = HEIGHT/2
@@ -62,12 +63,15 @@ while game:
     if y > WIDTH:
         y = 0
 
-#    pointer = pygame.mouse.get_pos()
-#    xangle = x - pointer[0]
-#    yangle = y - pointer[1]
-#    angle = math.degrees(math.atan2(xangle, yangle))
-#    newobj = pygame.transform.rotate(obj, angle)
-#    obj = newobj    
+    pointer = pygame.mouse.get_pos()
+    xangle = x - pointer[0]
+    yangle = y - pointer[1]
+    angle = math.degrees(math.atan2(xangle, yangle))
+    newobj = pygame.transform.rotate(obj, angle)
+    newrect = newobj.getrect
+    obj = newobj
+    
+        
     pygame.display.update()
 
 pygame.quit()
