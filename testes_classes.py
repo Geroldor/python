@@ -4,65 +4,34 @@ from pygame import *
 import math
 import random
 
-
 #inicia o jogo
 pygame.init()
 
 #tela
 HEIGHT = 480
-WIDTH = 640
+WIDTH = 720
 DIMENSIONS = (WIDTH, HEIGHT)
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode(DIMENSIONS)
 pygame.display.set_caption("top-down shooter test")
-
-#random
-words = ["porra", "caralho", "filho da puta", "arrombado", "pagão", "herege", "rato", "inseto", "cretino", "vagabunda", "puta", "fiat marea", "beta", "machista", "homofobico", "bicha", "gay", "nazista"]
+pygame.display.set_allow_screensaver(True)
+background =  pygame.image.load("python/ground.png")
 
 #mouse
 pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_CROSSHAIR)
 
-#classe do meteoro fds
-class Enemy(pygame.sprite.Sprite):
-    def __init__(self, size):
-        super().__init__()
-        self.size = size
-        self.posicx = random.randint(0, WIDTH)
-        self.posicy = random.randint(0, HEIGHT)
-        font = pygame.font.SysFont(pygame.font.get_default_font(), size)
-        self.image = font.render("EVANDRO", True, (255, 255, 255))
-        self.rect = self.image.get_rect()
-        self.speed_x = random.randint(0, 7)
-        self.speed_y = random.randint(0, 7)
-        all_sprites.append(self)
-        enemy_list.append(self)
-
-    def move(self):
-        self.posicx += self.speed_x
-        self.posicy += self.speed_y
-
-        if self.posicx >= WIDTH or self.posicx <= 0:
-            self.speed_x *= -1
-        if self.posicy >= HEIGHT or self.posicy <= 0:
-            self.speed_y *= -1
-
-    def update(self):
-        screen.blit(self.image, (self.posicx, self.posicy))
-        self.move()
+shots = ['•', '○', '°', '*', 'o', '.']
 
 #classe da bala
 class Ammo(pygame.sprite.Sprite):
-    def __init__(self, x, y, angle): #cria a bala
+    def __init__(self, x, y, angle):
         super().__init__() 
         font =  pygame.font.SysFont(pygame.font.get_default_font(), 32)
-        self.image = font.render("°", True, (255, 255, 255)).convert_alpha()
-        #self.image = font.render(random.choice(words), True, (255, 255, 255))
-        #self.image = pygame.image.load("pygame/bullet.png").convert()
+        self.image = font.render("•", True, (255, 255, 255)).convert_alpha()
         self.rect = self.image.get_rect()
-        self.rect.center = (x, y)
         self.posicx = x
         self.posicy = y
-        self.speed = 15
+        self.speed = 5
         self.angle = angle
         self.vel_x = math.cos(self.angle * (2*math.pi/360)) * self.speed
         self.vel_y = math.sin(self.angle * (2*math.pi/360)) * self.speed
@@ -77,80 +46,57 @@ class Ammo(pygame.sprite.Sprite):
     def update(self):
         self.AmmoMove()
 
-#classe player
+#classe Player
 class Player(pygame.sprite.Sprite):
-    def __init__(self, posicx, posicy):
-        #cria o player
+    def __init__(self):
         super().__init__()
-        self.posicx = posicx
-        self.posicy = posicy
-        font = pygame.font.SysFont(pygame.font.get_default_font(), 32)
-        self.image = font.render(">>>:", True, (255, 255, 255))
-        #self.image = pygame.image.load("python/player_test.png") #ta de reserva caso eu queira testar com uma foto
+        self.posicx = WIDTH//2
+        self.posicy = HEIGHT//2
+        #font = pygame.font.SysFont(pygame.font.get_default_font(), 32)
+        #self.image = font.render("<=>", True, (255, 255, 255)).convert_alpha()
+        #self.image = pygame.transform.scale(self.image, (72, 72))
+        self.image = pygame.transform.scale(pygame.image.load("Weapons/weaponR3.png"), (44, 44))
         self.image_base = self.image
         self.rect_base = self.image_base.get_rect()
-        self.rect = self.rect_base.copy() #sobre os retangulos: toda coisa que aparece na tela do pygame ta dentro de um retangulo,
-                                          #isso ajuda a determinar seu eixo e seu limite, e portanto ajuda na hora de girar o objeto(evita distorção
-                                          # ou que ele vá para a casa do caralho), e nas colisões (evita que os objetos passem entre si como se o outro não existisse)
-        self.speed_x_r = 6
-        self.speed_x_l = 6
-        self.speed_y_u = 6
-        self.speed_y_d = 6
+        self.rect = self.rect_base.copy() 
+        self.speed = 3
         self.shoot = False
         self.shoot_cooldown = 0
     
     def PlayerRotation(self):
-        #calcula e rotaciona o personagem em torno de seu próprio eixo
-        #de acordo com uma reta tangente traçada entre a posição do mouse e a posição do player
         self.mouse_coord = pygame.mouse.get_pos() # pega as coordenadas do mouse
-        self.x_change_player = (self.mouse_coord[0] - self.rect_base.centerx) #calcula a diferença entre o X do player e o X do mouse
-        self.y_change_player = (self.mouse_coord[1] - self.rect_base.centery) #calcula a diferença entre o Y do player e o Y do mouse
+        self.x_change_player = (self.mouse_coord[0] - self.posicx) #calcula a diferença entre o X do player e o X do mouse
+        self.y_change_player = (self.mouse_coord[1] - self.posicy) #calcula a diferença entre o Y do player e o Y do mouse
         self.angle = math.degrees(math.atan2(self.y_change_player, self.x_change_player)) #calcula a tangente pela equação abaixo e converte em graus
                                                                                           #(x_mouse - x_player)/(y_mouse - y_player)
         self.image = pygame.transform.rotate(self.image_base, -self.angle) #gira o player no grau obtido (a rotação no python é anti-horaria)
         self.rect = self.image.get_rect(center = self.rect_base.center) # atualiza o retangulo do player
 
     def move(self):
-        key = pygame.key.get_pressed() #detecta a tecla pressionada e insere em key, key é praticamente o teclado mapeado em um vetor
-                                       #da para usar event também, mas com o event não da pra usar varias teclas simultaneamente, tipo não
-                                       #da para andar na diagonal pressionando W e A ou W e S
+        key = pygame.key.get_pressed() 
+        if key[pygame.K_w] and self.posicy > 0: #caso W seja pressionado, o objeto do player vai subir até o limite da tela
+            self.posicy -= self.speed          #funciona igual pra todos os outros casos
 
-        if key[pygame.K_w]: #caso W seja pressionado, o objeto do player vai subir até o limite da tela
-            self.posicy -= self.speed_y_u           #funciona igual pra todos os outros casos
+        if key[pygame.K_s] and self.posicy < HEIGHT: 
+            self.posicy += self.speed
 
-        if key[pygame.K_s]:
-            self.posicy += self.speed_y_d
+        if key[pygame.K_a] and self.posicx > 0:
+            self.posicx -= self.speed
 
-        if key[pygame.K_a]:
-            self.posicx -= self.speed_x_l
+        if key[pygame.K_d] and self.posicx < WIDTH:
+            self.posicx += self.speed
 
-        if key[pygame.K_d]:
-            self.posicx += self.speed_x_r
-
-        
-        #caso isso vire um pewpew da vida, os IFs abaixo permitem fazer tipo uma tela fixa infinita
-        if self.posicx > WIDTH:
-            self.posicx = 0
-        if self.posicx < 0:
-            self.posicx = WIDTH
-        if self.posicy > HEIGHT:
-            self.posicy = 0
-        if self.posicy < 0:
-            self.posicy = HEIGHT
-
-        #manuseio do retangulo do objeto,
-        #todo objeto em pygame ta dentro de um retangulo (informação util para colisões e rotação)
         self.rect_base.center = (self.posicx, self.posicy)
         self.rect.center = self.rect_base.center
 
     def Shooting(self):
         #isso aqui cria e prepara um tiro qualquer na classe Ammo
         if self.shoot_cooldown == 0: #verifica o intervalo de tiro
-            self.shoot_cooldown = 5 #reseta o intervalon(quanto menor, mais parece uma metralhadora)
+            self.shoot_cooldown = 10 #reseta o intervalon(quanto menor, mais parece uma metralhadora)
 
-            self.bullet = Ammo(self.posicx, self.posicy, self.angle) #cria um projetil na coordenada do player
-            bullet_group.append(self.bullet) #coloca o projetil na lista de balas
-            all_sprites.append(self.bullet) #coloca o projetil na lista de objetos
+            self.bullet = Ammo(self.rect.centerx, self.rect.centery, self.angle) #cria um projetil na coordenada do player
+            bullet_group.add(self.bullet) #coloca o projetil na lista de balas
+            all_sprites.add(self.bullet) #coloca o projetil na lista de objetos
 
     def update(self):
         #atualiza o personagem de acordo com as suas funções
@@ -161,16 +107,16 @@ class Player(pygame.sprite.Sprite):
 
         if self.shoot_cooldown > 0: #verifica o intervalo de tiro (talvez tenha algo em time pra melhorar isso)
             self.shoot_cooldown -= 1
-    
 
 #Jogo
-player_character = Player(WIDTH/2, HEIGHT/2) #criação base do personagem do jogador
+
+player_character = Player() #criação base do personagem do jogador
 game = True #variavel que determina se o jogo ta rodando
-all_sprites = [] #lista infinita para colocar TODOS os objetos do jogo, independente da classe usada na criação
-bullet_group = [] #lista infinita para colocar os projeteis
-enemy_list = []
-all_sprites.append(player_character) #insere o player na lista dos objetos
-meteor = Enemy(44)
+#random_circle = pygame.Rect(50, 50, WIDTH/2, HEIGHT/2)
+all_sprites = pygame.sprite.Group() #lista infinita para colocar TODOS os objetos do jogo, independente da classe usada na criação
+bullet_group = pygame.sprite.Group() #lista infinita para colocar os projeteis
+enemy_list = pygame.sprite.Group()
+all_sprites.add(player_character) #insere o player na lista dos objetos
 while game:
     
     for event in pygame.event.get(): #para funcionar a saida do jogo
@@ -191,19 +137,9 @@ while game:
     else:
         player_character.shoot = False
 
-    screen.fill((0,0,0)) #preencher o fundo da tela com preto
-   
-    for b in bullet_group: #move as balas atiradas
-        b.AmmoMove()
-        for e in enemy_list:
-            if b.rect.colliderect(e.rect):
-                print('colidiu')
-                if(e.size > 8):
-                    new_enemy_one = Enemy(e.size/2)
-                    new_enemy_two = Enemy(e.size/2)
-                    e.kill()
-    for sprite in all_sprites: #atualiza todos os sprites do jogo (talvez as balas estejam sendo atualizadas 2x)
-        sprite.update()
+    screen.fill((0, 128, 0))
+    all_sprites.update()
+
     pygame.display.update() #atualiza a tela
     clock.tick(60) #determina o fps
   
