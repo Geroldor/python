@@ -5,11 +5,14 @@ import sys
 pygame.init()
 
 # Set up the window
-background = pygame.image.load("python/sprites/Background2.png")
-screen = pygame.display.set_mode((640, 480))
+bottom_panel = 150
+screen_width = 800
+screen_height = 400 + bottom_panel
+screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption('RPG')
 fpd = pygame.time.Clock()
-
+background = pygame.image.load("python/sprites/background.png").convert_alpha()
+panel = pygame.image.load("python/sprites/panel.png").convert_alpha()
 
 # Set up the colors
 BLACK = (0, 0, 0)
@@ -27,24 +30,25 @@ class Hero:
         self.strength = strength
         self.defense = defense
         self.alive = True
+
         self.image_list = [pygame.image.load("python/sprites/Warrior/Individual/idle/Warrior_Idle_1.png"), pygame.image.load("python/sprites/Warrior/Individual/idle/Warrior_Idle_2.png"), pygame.image.load("python/sprites/Warrior/Individual/idle/Warrior_Idle_3.png"), pygame.image.load("python/sprites/Warrior/Individual/idle/Warrior_Idle_4.png"), pygame.image.load("python/sprites/Warrior/Individual/idle/Warrior_Idle_5.png"), pygame.image.load("python/sprites/Warrior/Individual/idle/Warrior_Idle_6.png")]
         self.image = self.image_list[0]
         self.image_index = 0
         self.image = pygame.transform.scale(self.image, ((self.image.get_width() * 3), (self.image.get_height() * 3)))
         self.rect = self.image.get_rect()
         self.rect.x = 90
-        self.rect.y = 180
+        self.rect.y = 210
 
 
     def attack(self, enemy):
         enemy.health -= self.strength - enemy.defense
-
-    def take_damage(self, damage):
-        self.health -= damage
+        pygame.time.wait(120)
+        enemy.health -= self.strength - enemy.defense
 
     def update(self):
         screen.blit(self.image, self.rect)
-        pygame.draw.rect(screen, blue, (130, 310, 80, 10))
+        pygame.draw.rect(screen, red, (500, 435, 280 - ((280 / 100) * (100 - self.health)), 20))
+        pygame.draw.rect(screen, green, (500, 435, 280, 20))
         
 
 class Enemy:
@@ -53,27 +57,24 @@ class Enemy:
         self.health = health
         self.strength = strength
         self.defense = defense
+        self.alive = True
+
+        self.image_list = [pygame.image.load("python/sprites/Boss/idle/tile000.png"), pygame.image.load("python/sprites/Boss/idle/tile001.png"), pygame.image.load("python/sprites/Boss/idle/tile002.png"), pygame.image.load("python/sprites/Boss/idle/tile003.png")]
+        self.image = self.image_list[0]
+        self.image_index = 0
+        self.image = pygame.transform.scale(self.image, ((self.image.get_width() * 3), (self.image.get_height() * 3)))
+        self.rect = self.image.get_rect()
+        self.rect.x = 500
+        self.rect.y = 155
 
     def attack(self, hero):
         hero.health -= self.strength - hero.defense
 
-    def take_damage(self, damage):
-        self.health -= damage
-
     def update(self):
-        pygame.draw.rect(screen, blue, (350, 200, 40, 40))
-        pygame.draw.rect(screen, yellow, (330, 260, 90, 10))
+        screen.blit(self.image, self.rect)
+        pygame.draw.rect(screen, red, (500, 495, 280 - ((280 / 100) * (100 - self.health)), 20))
+        pygame.draw.rect(screen, green, (500, 495, 280, 20))
 
-class walls:
-    def __init__(self, color, x, y, width, height):
-        self.color = color
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-
-    def update(self):
-        pygame.draw.rect(screen, self.color, (self.x, self.y, self.width, self.height))
 
 # Create entitys
 player = Hero("Player", 100, 10, 5)
@@ -85,6 +86,7 @@ running = True
 while running:
     # Fill the background with white
     screen.blit(background, (0, 0))
+    screen.blit(panel, (0, screen_height - bottom_panel))
 
     # Draw the player on the screen
     player.update()
