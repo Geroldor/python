@@ -169,6 +169,7 @@ villain = knight("Villain", 100, 10, 5)
 # Start the game loop
 running = True
 while running:
+    
     # Fill the background with white
     screen.blit(background, (0, 0))
     screen.blit(panel, (0, screen_height - bottom_panel))
