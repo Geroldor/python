@@ -7,26 +7,29 @@ pygame.init()
 
 tela = pygame.display.set_mode((640, 480))
 clock = pygame.time.Clock()
+backgiund = pygame.image.load("python\sprites\\background.png")
 
 class Player:
     def __init__(self):
-        self.x = 480//2
-        self.y = 640//2
+        self.x = 640//2
+        self.y = 480//2
         self.width = 32
         self.height = 32
+        self.img = pygame.image.load("python\sprites\Warrior\Individual\idle\Warrior_Idle_1.png")        
+        self.img = pygame.transform.scale(self.img, (self.width * 3, self.height * 3))
+    
+    def update(self):
+        tela.blit(self.img, (self.x, self.y))
         
-    def main(self, display):
-        pygame.draw.circle(display, (255, 255, 255), (self.x, self.y), self.width)
-
 player = Player()
 
 while True:
-    tela.fill((0, 0, 0))
-    pygame.draw.circle(tela, (255, 255, 255), (player.x, player.y), player.width)
+    
+    
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
             exit()
             
-    player.main(tela)       
+    player.update()
     clock.tick(30)
