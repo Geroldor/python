@@ -17,7 +17,9 @@ total_fighters = 2
 action_cooldown = 0
 action_wait_time = 30
 attack = False
+potion = False
 clicked = False
+
 
 
 pygame.display.set_caption('RPG')
@@ -191,18 +193,17 @@ while running:
         if clicked:
             attack = True
             target = villain
-
-
-
     # player action
+    
     if player.alive:
         if current_fighter == 1:
             action_cooldown += 1
             if action_cooldown >= action_wait_time:
                 # Look for player action
-                player.attack(villain)
-                current_fighter += 1
-                action_cooldown = 0
+                if attack and target != None:
+                    player.attack(villain)
+                    current_fighter += 1
+                    action_cooldown = 0
     
     # enemy action
     if villain.alive:
