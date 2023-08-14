@@ -16,12 +16,15 @@ current_fighter = 1
 total_fighters = 2
 action_cooldown = 0
 action_wait_time = 30
+attack = False
+clicked = False
 
 
 pygame.display.set_caption('RPG')
 fpd = pygame.time.Clock()
 background = pygame.image.load("python/sprites/background.png").convert_alpha()
 panel = pygame.image.load("python/sprites/panel.png").convert_alpha()
+sword_icon = pygame.image.load("python/sprites/sword.png").convert_alpha()
 
 # Set up the colors
 BLACK = (0, 0, 0)
@@ -180,6 +183,17 @@ while running:
     # Draw the enemy on the screen
     villain.update()
 
+    # reset the actions
+    attack = False
+    target = None
+    pos = pygame.mouse.get_pos()
+    if villain.rect.collidepoint(pos):
+        if clicked:
+            attack = True
+            target = villain
+
+
+
     # player action
     if player.alive:
         if current_fighter == 1:
@@ -204,6 +218,11 @@ while running:
     for event in pygame.event.get():
         if event.type == QUIT:
             running = False
+        
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            clicked = True
+        else:
+            clicked = False
 
     # Update the display
     pygame.display.update()
