@@ -17,7 +17,7 @@ total_fighters = 2
 action_cooldown = 0
 action_wait_time = 30
 attack = False
-potion = False
+potions = 5
 clicked = False
 
 
@@ -62,12 +62,13 @@ class Hero:
         self.rect = self.image.get_rect()
         self.rect.x = 90
         self.rect.y = 210
+
+    def Health_Bar(self):
         font = pygame.font.SysFont("Arial", 20)
         self.text = font.render(self.name, True, WHITE)
         h = str(self.health) + "/" + str(self.max_health)
         self.health_text = font.render(h, True, WHITE)
-
-    def Health_Bar(self):
+        
         life_percentage = (self.health / self.max_health)
         healthbar_percentage = life_percentage * 100
         current_health = (280 / 100) * healthbar_percentage
@@ -76,8 +77,14 @@ class Hero:
         pygame.draw.rect(screen, medium_green, (500, 435, current_health, 15))
         screen.blit(self.text, (425, 435))
         screen.blit(self.health_text, (705, 455))
+        if self.health <= 0:
+            self.health = 0
+            self.alive = False
 
-
+    def cure(self):
+        self.health += 50
+        if self.health > self.max_health:
+            self.health = self.max_health
 
     def attack(self, enemy):
         self.image_list = self.image_attack_list
@@ -128,12 +135,12 @@ class knight:
         self.rect = self.image.get_rect()
         self.rect.x = 300
         self.rect.y = 65
+
+    def Health_Bar(self):
         font = pygame.font.SysFont("Arial", 20)
         self.text = font.render(self.name, True, WHITE)
         h = str(self.health) + "/" + str(self.max_health)
         self.health_text = font.render(h, True, WHITE)
-
-    def Health_Bar(self):
         life_percentage = (self.health / self.max_health)
         healthbar_percentage = life_percentage * 100
         current_health = (280 / 100) * healthbar_percentage
@@ -142,6 +149,9 @@ class knight:
         pygame.draw.rect(screen, medium_green, (500, 495, current_health, 15))
         screen.blit(self.text, (425, 495))
         screen.blit(self.health_text, (705, 515))
+        if self.health <= 0:
+            self.health = 0
+            self.alive = False
 
     def attack(self, hero):
         self.image_list = self.image_attack_list
@@ -184,6 +194,13 @@ while running:
 
     # Draw the enemy on the screen
     villain.update()
+    
+    # show the potions quantity
+    potions_qtd_text = str(potions)
+    potion_text = pygame.font.SysFont("Arial", 24).render("Poção x" + potions_qtd_text, True, WHITE)
+    potion_use_text = pygame.font.SysFont("Arial", 20).render("Pressione E para usar a poção", True, WHITE)
+    screen.blit(potion_text, (20, screen_height - bottom_panel + 10))
+    screen.blit(potion_use_text, (20, screen_height - bottom_panel + 40))
 
     # reset the actions
     attack = False
@@ -193,8 +210,9 @@ while running:
         if clicked:
             attack = True
             target = villain
+            
+            
     # player action
-    
     if player.alive:
         if current_fighter == 1:
             action_cooldown += 1
@@ -204,6 +222,8 @@ while running:
                     player.attack(villain)
                     current_fighter += 1
                     action_cooldown = 0
+    
+    
     
     # enemy action
     if villain.alive:
@@ -215,6 +235,14 @@ while running:
                 current_fighter -= 1
                 action_cooldown = 0
     
+    if villain.alive == False:
+        new_healt = villain.health + 50
+        new_strength = villain.strength + 5
+        new_defense = villain.defense + 5
+        potions += random.randint(1, 3)
+        newvillain = knight("Villain", new_healt, new_strength, new_defense)
+        villain = newvillain
+    
     # Event handling
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -224,6 +252,11 @@ while running:
             clicked = True
         else:
             clicked = False
+            
+        if event.type == pygame.KEYDOWN:
+            if pygame.key.name(event.key) == "e":
+                player.cure()
+                potions -= 1
 
     # Update the display
     pygame.display.update()
