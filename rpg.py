@@ -14,19 +14,15 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 #game variables
 current_fighter = 1
 total_fighters = 2
-action_cooldown = 0
+action_cooldown = 1
 action_wait_time = 30
 attack = False
 potions = 5
 clicked = False
-
-
-
-pygame.display.set_caption('RPG')
-fpd = pygame.time.Clock()
-background = pygame.image.load("python/sprites/background.png").convert_alpha()
-panel = pygame.image.load("python/sprites/panel.png").convert_alpha()
-sword_icon = pygame.image.load("python/sprites/sword.png").convert_alpha()
+villain_hp = 100
+villain_strength = 20
+villain_defense = 10
+game_over = False
 
 # Set up the colors
 BLACK = (0, 0, 0)
@@ -38,6 +34,16 @@ medium_green = (0, 100, 0)
 blue = (0, 0, 255)
 yellow = (255, 255, 0)
 
+pygame.display.set_caption('RPG')
+fpd = pygame.time.Clock()
+
+# Load images
+background = pygame.image.load("python/sprites/background.png").convert_alpha()
+panel = pygame.image.load("python/sprites/panel.png").convert_alpha()
+sword_icon = pygame.image.load("python/sprites/sword.png").convert_alpha()
+game_over_font = pygame.font.SysFont("Arial", 60)
+game_over_text = game_over_font.render("GAME OVER", True, WHITE)
+
 class Hero:
     def __init__(self, name, health, strength, defense):
         self.name = name
@@ -47,14 +53,17 @@ class Hero:
         self.defense = defense
         self.alive = True
         self.image_list = []
+        # Idle sprites
         self.image_idle_list = [pygame.image.load("python/sprites/Warrior/Individual/idle/Warrior_Idle_1.png"), pygame.image.load("python/sprites/Warrior/Individual/idle/Warrior_Idle_2.png"), pygame.image.load("python/sprites/Warrior/Individual/idle/Warrior_Idle_3.png"), pygame.image.load("python/sprites/Warrior/Individual/idle/Warrior_Idle_4.png"), pygame.image.load("python/sprites/Warrior/Individual/idle/Warrior_Idle_5.png"), pygame.image.load("python/sprites/Warrior/Individual/idle/Warrior_Idle_6.png")]
         for i in range(len(self.image_idle_list)):
             self.image_idle_list[i] = pygame.transform.scale(self.image_idle_list[i], ((self.image_idle_list[i].get_width() * 3), (self.image_idle_list[i].get_height() * 3)))
+        # Attack sprites
         self.image_attack_list = []
         for i in range(12):
             self.image_attack_list.append(pygame.image.load("python/sprites/Warrior/Individual/Attack/Warrior_Attack_" + str(i + 1) + ".png"))
         for i in range(len(self.image_attack_list)):
             self.image_attack_list[i] = pygame.transform.scale(self.image_attack_list[i], ((self.image_attack_list[i].get_width() * 3), (self.image_attack_list[i].get_height() * 3)))
+        
         self.image_list = self.image_idle_list
         self.image = self.image_list[0]
         self.image_index = 0
@@ -221,7 +230,11 @@ while running:
                 if attack and target != None:
                     player.attack(villain)
                     current_fighter += 1
-                    action_cooldown = 0
+    else:
+        game_over = True
+        game_over_x = screen_width // 2 - game_over_text.get_width() // 2
+        game_over_y = screen_height // 2 - game_over_text.get_height() // 2
+        screen.blit(game_over_text, (game_over_x, game_over_y))                
     
     
     
@@ -236,11 +249,15 @@ while running:
                 action_cooldown = 0
     
     if villain.alive == False:
-        new_healt = villain.health + 50
-        new_strength = villain.strength + 5
-        new_defense = villain.defense + 5
+        villain_hp += 50
+        villain_strength += 5
+        villain_defense += 5
+        player.max_health += 25
+        player.health = player.max_health
+        player.strength += 3
+        player.defense += 1
         potions += random.randint(1, 3)
-        newvillain = knight("Villain", new_healt, new_strength, new_defense)
+        newvillain = knight("Villain", villain_hp, villain_defense, villain_strength)
         villain = newvillain
     
     # Event handling
@@ -257,7 +274,14 @@ while running:
             if pygame.key.name(event.key) == "e":
                 player.cure()
                 potions -= 1
-
+            
+            if pygame.key.name(event.key) == "r":
+                new_player = Hero("Player", 100, 10, 5)
+                player = new_player
+                player.alive = True
+                newvillain = knight("Villain", 100, 10, 5)
+                villain = newvillain
+    
     # Update the display
     pygame.display.update()
     fpd.tick(60)
