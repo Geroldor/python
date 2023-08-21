@@ -70,7 +70,7 @@ class Hero:
         for i in range(11):
             self.image_death_list.append(pygame.image.load("python/sprites/Warrior/Individual/DeathnoEffect/Warrior_Death_" + str(i + 1) + ".png"))
         for i in range(len(self.image_death_list)):
-            self.image_death_list[i] = pygame.transform.scale(self.image_death_list[i], ((self.image_death_list[i].get_width() * 3), (self.image_death_list.get_height() * 3)))
+            self.image_death_list[i] = pygame.transform.scale(self.image_death_list[i], ((self.image_death_list[i].get_width() * 3), (self.image_death_list[i].get_height() * 3)))
         
         self.image_list = self.image_idle_list
         self.image = self.image_list[0]
@@ -110,19 +110,35 @@ class Hero:
             enemy.health = 0
             enemy.alive = False
         
+    def death(self):
+        self.image_list = self.image_death_list
 
     def update(self):
         self.Health_Bar()
         animation_cooldown = 100
-        self.image = self.image_list[self.image_index]
+        if self.image_list == self.image_idle_list:
+            if self.image_index >= len(self.image_list):
+                self.image_index = 0
+        
+        if self.alive == False:
+            self.death()
+        
+        if self.image_list == self.image_death_list:
+            if self.image_index == 10:
+                self.image = self.image_death_list[10]
+        
         if self.image_list == self.image_attack_list:
             if self.image_index == 11:
                 self.image_list = self.image_idle_list
+            if self.image_index >= len(self.image_list):
+                self.image_index = 0
+
         if pygame.time.get_ticks() - self.update_index > animation_cooldown:
             self.image_index += 1
             self.update_index = pygame.time.get_ticks()
-        if self.image_index >= len(self.image_list):
-            self.image_index = 0
+        
+        
+        
         screen.blit(self.image, self.rect)
         
 
