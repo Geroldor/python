@@ -57,12 +57,20 @@ class Hero:
         self.image_idle_list = [pygame.image.load("python/sprites/Warrior/Individual/idle/Warrior_Idle_1.png"), pygame.image.load("python/sprites/Warrior/Individual/idle/Warrior_Idle_2.png"), pygame.image.load("python/sprites/Warrior/Individual/idle/Warrior_Idle_3.png"), pygame.image.load("python/sprites/Warrior/Individual/idle/Warrior_Idle_4.png"), pygame.image.load("python/sprites/Warrior/Individual/idle/Warrior_Idle_5.png"), pygame.image.load("python/sprites/Warrior/Individual/idle/Warrior_Idle_6.png")]
         for i in range(len(self.image_idle_list)):
             self.image_idle_list[i] = pygame.transform.scale(self.image_idle_list[i], ((self.image_idle_list[i].get_width() * 3), (self.image_idle_list[i].get_height() * 3)))
+            
         # Attack sprites
         self.image_attack_list = []
         for i in range(12):
             self.image_attack_list.append(pygame.image.load("python/sprites/Warrior/Individual/Attack/Warrior_Attack_" + str(i + 1) + ".png"))
         for i in range(len(self.image_attack_list)):
             self.image_attack_list[i] = pygame.transform.scale(self.image_attack_list[i], ((self.image_attack_list[i].get_width() * 3), (self.image_attack_list[i].get_height() * 3)))
+        
+        # Death sprites
+        self.image_death_list = []
+        for i in range(11):
+            self.image_death_list.append(pygame.image.load("python/sprites/Warrior/Individual/DeathnoEffect/Warrior_Death_" + str(i + 1) + ".png"))
+        for i in range(len(self.image_death_list)):
+            self.image_death_list[i] = pygame.transform.scale(self.image_death_list[i], ((self.image_death_list[i].get_width() * 3), (self.image_death_list.get_height() * 3)))
         
         self.image_list = self.image_idle_list
         self.image = self.image_list[0]
