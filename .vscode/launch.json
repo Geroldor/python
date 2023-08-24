@@ -15,9 +15,9 @@
       "request": "launch",
       "args": [],
       "stopAtEntry": false,
-      "externalConsole": false,
-      "cwd": "/home/geraldo/Documentos/uel/ed/python",
-      "program": "/home/geraldo/Documentos/uel/ed/python/build/Debug/outDebug",
+      "externalConsole": true,
+      "cwd": "c:/Users/geral/OneDrive/Documentos/python",
+      "program": "c:/Users/geral/OneDrive/Documentos/python/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "/usr/bin/gdb",
       "setupCommands": [
