@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 import random
 import math
+import sys
 
 # Initialize pygame
 pygame.init()
