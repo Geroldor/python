@@ -16,10 +16,19 @@ screen = pygame.display.set_mode((800, 600))
 # Set up the clock
 clock = pygame.time.Clock()
 
+def end_game():
+    game_over_font = pygame.font.SysFont("Arial", 60)
+    game_over_text = game_over_font.render("GAME OVER", True, (0, 0, 0))
+    game_over_x = width // 2 - game_over_text.get_width() // 2
+    game_over_y = height // 2 - game_over_text.get_height() // 2
+    screen.blit(game_over_text, (game_over_x, game_over_y))
+    for meteorite in meteorite_list:
+        meteorite.kill()
+
 # Set up the player
 class Player(pygame.sprite.Sprite):
     def __init__(self, speed, damage):
-        
+        super().__init__()
         self.x = width // 2
         self.y = height // 2
         self.pos = pygame.math.Vector2(self.x, self.y)
@@ -27,11 +36,12 @@ class Player(pygame.sprite.Sprite):
         self.damage = damage
         self.shoot_cooldown = 0
         self.shooting = False
-        self.image = pygame.image.load("python/tps/sprites/seta-direita.png").convert_alpha()
+        self.image = pygame.image.load("sprites/seta-direita.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, ((self.image.get_width() // 2), (self.image.get_height() // 2)))
         self.rect = self.image.get_rect()
         self.base_image = self.image
         self.base_rect = self.base_image.get_rect(center = self.pos)
+        self.alive = True
         
     def player_rotation(self):
         self.mouse_coords = pygame.mouse.get_pos()
@@ -46,7 +56,6 @@ class Player(pygame.sprite.Sprite):
             self.shoot_cooldown = 20
             self.bullet = Bullet(self.x, self.y, self.angle)
             bullet_group.add(self.bullet)
-            
 
     def user_input(self):
         key = pygame.key.get_pressed()
@@ -65,7 +74,6 @@ class Player(pygame.sprite.Sprite):
         else:
             self.shooting = False
     
-    
     def move(self):
         self.pos = pygame.math.Vector2(self.x, self.y)
         self.base_rect.center = self.pos
@@ -78,12 +86,22 @@ class Player(pygame.sprite.Sprite):
         screen.blit(self.image, self.rect)
         if self.shoot_cooldown > 0:
             self.shoot_cooldown -= 1
-        
+        if self.rect.collidelist(meteorite_list) > -1:
+            print("hit")
+            meteorite = meteorite_list[self.rect.collidelist(meteorite_list)]
+            meteorite.kill()
+            self.alive = False
+            self.kill()
+            meteorite_list.remove(meteorite)
+            all_sprites.remove(self)
+
+
+# Set up the bullet
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y, angle):
         super().__init__()
         
-        self.image = pygame.image.load("python/tps/sprites/ponto-final.png")
+        self.image = pygame.image.load("sprites/ponto-final.png")
         self.image = pygame.transform.scale(self.image, ((self.image.get_width() * 2), (self.image.get_height() * 2)))
         self.x = x
         self.y = y
@@ -105,27 +123,30 @@ class Bullet(pygame.sprite.Sprite):
         if self.x < 0 or self.x > width:
             self.kill()
         
-        if self.rect.collidelist(all_sprites) > -1:
+        if self.rect.collidelist(meteorite_list) > -1:
             print("hit")
-            meteorite = all_sprites[self.rect.collidelist(all_sprites)]
+            meteorite = meteorite_list[self.rect.collidelist(meteorite_list)]
             meteorite.kill()
             all_sprites.remove(meteorite)
             bullet_group.remove(self)
             self.kill
+
+
 
 # Set up the meteorite
 class Meteorite(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         
-        self.image = pygame.image.load("python/tps/sprites/meteoro.png")
+        self.image = pygame.image.load("tps/sprites/meteoro1.png")
         self.image = pygame.transform.scale(self.image, ((self.image.get_width() // 2), (self.image.get_height() // 2)))
         self.x = random.randint(0, width)
         self.y = random.randint(0, height)
         self.rect = self.image.get_rect()
         self.rect.center = (self.x, self.y)
         self.x_vel = random.randint(-5, 5)
-        self.y_vel = random.randint(-5, 5)        
+        self.y_vel = random.randint(-5, 5)
+        meteorite_list.append(self)        
 
     def move(self):
         self.x += self.x_vel
@@ -140,21 +161,25 @@ class Meteorite(pygame.sprite.Sprite):
     def update(self):
         self.move()
         screen.blit(self.image, self.rect)
-        if self.x < 0 or self.x > width:
+        if self.rect.colliderect(player.rect):
+            player.alive = False
             self.kill()
-        if self.y < 0 or self.y > height:
-            self.kill()
-        if self.rect.collidelist(all_sprites) > -1:
-            print("hit")
-            meteorite = all_sprites[self.rect.collidelist(all_sprites)]
-            meteorite.kill()
-            all_sprites.remove(meteorite)
-            self.kill()
+            all_sprites.remove(self)
+            meteorite_list.remove(self)
+        
     
 # Initialize game objects
 player = Player(10, 1)
 all_sprites = []
 bullet_group = pygame.sprite.Group()
+all_sprites.append(player)
+meteorite_list = []
+for i in range(random.randint(1, 10)):
+    meteorite = Meteorite()
+    all_sprites.append(meteorite)
+    meteorite_list.append(meteorite)
+    
+    
    
 # Set up the game loop
 running = True
@@ -164,6 +189,18 @@ while running:
     for event in pygame.event.get():
         if event.type == QUIT:
             running = False
+    key = pygame.key.get_pressed()
+    if key[pygame.K_r] and player.alive == False:
+        player = Player(10, 1)
+        all_sprites.append(player)
+        player.alive = True
+    
+    if player.alive == False:
+        game_over_font = pygame.font.SysFont("Arial", 60)
+        game_over_text = game_over_font.render("GAME OVER", True, (0, 0, 0))
+        game_over_x = width // 2 - game_over_text.get_width() // 2
+        game_over_y = height // 2 - game_over_text.get_height() // 2
+        screen.blit(game_over_text, (game_over_x, game_over_y)) 
     
     if player.x < 0:
         player.x = width
@@ -173,13 +210,18 @@ while running:
         player.y = height
     if player.y > height:
         player.y = 0
+        
+    ra = random.randint(1, 200)
+    if ra == 5:
+        meteorite = Meteorite()
+        all_sprites.append(meteorite)
 
     # Update game state
     screen.fill(background_color)
     bullet_group.update()
     for sprite in all_sprites:
         sprite.update()
-    player.update()
+
     
     pygame.display.update()
     clock.tick(30)
