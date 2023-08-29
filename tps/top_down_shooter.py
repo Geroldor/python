@@ -116,8 +116,9 @@ class Bullet(pygame.sprite.Sprite):
         
         if self.rect.collidelist(meteorite_list) > -1:
             meteorite = meteorite_list[self.rect.collidelist(meteorite_list)]
-            meteorite.kill()
+            all_sprites.remove(meteorite)
             meteorite_list.remove(meteorite)
+            meteorite.kill()
             bullet_group.remove(self)
             self.kill()
 
