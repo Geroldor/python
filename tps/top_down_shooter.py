@@ -99,8 +99,8 @@ class Bullet(pygame.sprite.Sprite):
         self.angle = angle
         self.rect = self.image.get_rect()
         self.rect.center = (self.x, self.y)
-        self.x_vel = math.cos(self.angle * (2*math.pi/360)) * 10
-        self.y_vel = math.sin(self.angle * (2*math.pi/360)) * 10
+        self.x_vel = math.cos(self.angle * (2*math.pi/360)) * 13
+        self.y_vel = math.sin(self.angle * (2*math.pi/360)) * 13
 
     def move(self):
         self.x += self.x_vel
