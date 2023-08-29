@@ -112,46 +112,50 @@ class Bullet(pygame.sprite.Sprite):
             all_sprites.remove(meteorite)
             bullet_group.remove(self)
             self.kill
-            for i in range(random.randint(1, 3)):
-                metorite = Meteor(random.randint(0, width), random.randint(0, height), random.randint(-3, 2))
-                all_sprites.append(metorite)
-            
-        
-class Meteor(pygame.sprite.Sprite):
-    def __init__(self, x, y, speed):
+
+# Set up the meteorite
+class Meteorite(pygame.sprite.Sprite):
+    def __init__(self):
         super().__init__()
-        self.image = pygame.image.load("python/tps/sprites/meteoro1.png")
-        self.scale = random.randint(1, 3)
-        self.image = pygame.transform.scale(self.image, ((self.image.get_width() * self.scale), (self.image.get_height() * self.scale)))
+        
+        self.image = pygame.image.load("python/tps/sprites/meteoro.png")
+        self.image = pygame.transform.scale(self.image, ((self.image.get_width() // 2), (self.image.get_height() // 2)))
+        self.x = random.randint(0, width)
+        self.y = random.randint(0, height)
         self.rect = self.image.get_rect()
-        self.image_base = self.image
-        self.rect_base = self.image_base.get_rect()
-        self.x = x
-        self.y = y
-        self.speedx = speed
-        self.speedy = speed
-        
+        self.rect.center = (self.x, self.y)
+        self.x_vel = random.randint(-5, 5)
+        self.y_vel = random.randint(-5, 5)        
+
     def move(self):
-        self.x += self.speedx
-        self.y += self.speedy
-        
+        self.x += self.x_vel
+        self.y += self.y_vel
+        self.rect.x = int(self.x)
+        self.rect.y = int(self.y)
         if self.x < 0 or self.x > width:
-            self.speedx *= -1
+            self.x_vel *= -1
         if self.y < 0 or self.y > height:
-            self.speedy *= -1
-            
+            self.y_vel *= -1
+    
     def update(self):
         self.move()
-        screen.blit(self.image, (self.x, self.y))
-        
+        screen.blit(self.image, self.rect)
+        if self.x < 0 or self.x > width:
+            self.kill()
+        if self.y < 0 or self.y > height:
+            self.kill()
+        if self.rect.collidelist(all_sprites) > -1:
+            print("hit")
+            meteorite = all_sprites[self.rect.collidelist(all_sprites)]
+            meteorite.kill()
+            all_sprites.remove(meteorite)
+            self.kill()
+    
 # Initialize game objects
 player = Player(10, 1)
 all_sprites = []
 bullet_group = pygame.sprite.Group()
-for i in range(random.randint(1, 10)):
-    metorite = Meteor(random.randint(0, width), random.randint(0, height), random.randint(-3, 2))
-    all_sprites.append(metorite)
-    
+   
 # Set up the game loop
 running = True
 while running:
